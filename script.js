@@ -61,7 +61,7 @@ async function getSongs(folder) {
 }
 
 function playMusic(track, pause = false) {
-    currentSong.src = `/${currFolder}/` + track
+    currentSong.src = `/${currFolder}/${encodeURIComponent(track)}`;
     if (!pause) {
         currentSong.play();
         play.src = "/Spotify.svg/pause.svg";
