@@ -123,7 +123,7 @@ async function DisplayAblums(params) {
 async function main(params) {
 
 
-    await getSongs('songs/ncs')
+    await getSongs('songs/2')
     playMusic(Songs[0], true)
 
 
