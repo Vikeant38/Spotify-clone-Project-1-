@@ -90,7 +90,7 @@ async function DisplayAblums(params) {
             let folder = e.href.split("/").slice(-2)[0]
 
             //Get the meta data of folders  
-            let a = await fetch(`http://127.0.0.1:3000/songs/${folder}/info.json`)
+            let a = await fetch(`/songs/${folder}/info.json`)
             let respond = await a.json()
             console.log(respond);
             cardcontainer.innerHTML = cardcontainer.innerHTML + `<div data-folder=${folder} class="card ">
