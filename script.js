@@ -20,46 +20,51 @@ function formatTime(seconds) {
 
 async function getSongs(folder) {
     currFolder = folder;
-    let a = await fetch(`/${folder}/`)
-    let respond = await a.text()
-    let div = document.createElement("div")
-    div.innerHTML = respond;
-    let as = div.getElementsByTagName("a")
-    Songs = []
-    for (let index = 0; index < as.length; index++) {
-        const element = as[index];
-        if (element.href.endsWith("mp3")) {
-            Songs.push(element.href.split(`/${folder}/`)[1].replaceAll("%20", " "))
-        }
+    
+    try {
+        // 1. Load the pre-defined song list
+        const response = await fetch('/songs.json');
+        const allSongs = await response.json();
+        
+        // 2. Extract folder name (remove 'songs/' if present)
+        const folderName = folder.replace('songs/', '');
+        Songs = allSongs[folderName] || [];
+        
+        // 3. Update the UI
+        const Songul = document.querySelector(".song-list ul");
+        Songul.innerHTML = Songs.map(song => `
+            <li>
+                <img class="invert" src="/Spotify.svg/music.svg" alt="">
+                <div class="info">
+                    <div class="song-name small">${song.replace('.mp3', '')}</div>
+                    <div class="song-artist small">VP</div>
+                </div>
+                <div class="playnow flex justify-center">
+                    <span>Play now</span>
+                    <img class="invert" src="/Spotify.svg/play.svg" height="30px" width="30px" alt="">
+                </div>
+            </li>
+        `).join('');
 
+        // 4. Attach event listeners
+        Array.from(Songul.children).forEach(li => {
+            li.addEventListener('click', () => {
+                const songName = li.querySelector('.song-name').textContent + '.mp3';
+                playMusic(songName);
+            });
+        });
+        
+        return Songs;
+        
+    } catch (error) {
+        console.error("Failed to load songs:", error);
+        // Show error to user
+        document.querySelector(".song-list ul").innerHTML = `
+            <li class="error">Failed to load playlist. Please try again.</li>
+        `;
+        return [];
     }
-    let Songul = document.querySelector(".song-list").getElementsByTagName("ul")[0];
-    Songul.innerHTML = " ";
-    for (const element of Songs) {
-        Songul.innerHTML = Songul.innerHTML + `<li><img class="invert" src="/Spotify.svg/music.svg" alt="">
-                            <div class="info">
-                                <div class="song-name small">${element.replaceAll("%20", " ")}</div>
-                                <div class="song-artist small">VP</div>
-                            </div>
-                            <div class="playnow flex justify-center">
-                                <span>Play now</span>
-                                <img class="invert" src="/Spotify.svg/play.svg" height="30px" width="30px";alt="">
-                            </div></li>`
-    }
-
-
-    //Atttach an event song to each song
-    Array.from(document.querySelector(".song-list").getElementsByTagName("li")).forEach(e => {
-        e.addEventListener("click", element => {
-
-            playMusic(e.querySelector(".info").firstElementChild.innerHTML)
-
-        })
-    })
-    return Songs
-
 }
-
 function playMusic(track, pause = false) {
     currentSong.src = `/${currFolder}/${encodeURIComponent(track)}`;
     if (!pause) {
